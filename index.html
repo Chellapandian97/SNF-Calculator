@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Milk CLR Calculator</title>
+<style>
+  :root { color-scheme: light; --navy:#12304a; --blue:#176b87; --pale:#edf6f8; --border:#cbd8df; --text:#18303d; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px; font-family:Arial,Helvetica,sans-serif; background:#f3f7f9; color:var(--text); }
+  main { max-width:480px; margin:24px auto; background:#fff; border:1px solid var(--border); border-radius:18px; padding:24px; box-shadow:0 8px 24px rgba(18,48,74,.08); }
+  h1 { margin:0 0 8px; color:var(--navy); font-size:25px; }
+  .sub { margin:0 0 24px; color:#526875; font-size:14px; line-height:1.5; }
+  label { display:block; font-weight:700; margin:16px 0 7px; }
+  input { width:100%; min-height:54px; border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:22px; color:var(--text); background:#fff; }
+  input:focus { outline:3px solid #c6e8f1; border-color:var(--blue); }
+  .hint { margin:5px 0 0; font-size:12px; color:#607784; }
+  .result { margin-top:22px; background:var(--pale); border:1px solid #d0e7ec; border-radius:13px; padding:18px; }
+  .result-title { font-size:14px; font-weight:700; color:#3f6472; }
+  #output { font-size:42px; font-weight:800; color:var(--navy); margin-top:6px; overflow-wrap:anywhere; }
+  #status { min-height:18px; margin-top:7px; color:#a3332c; font-size:13px; line-height:1.4; }
+  .formula { margin-top:18px; font-size:13px; line-height:1.65; color:#526875; }
+  button { width:100%; min-height:48px; margin-top:16px; border:1px solid var(--border); border-radius:10px; background:white; color:var(--navy); font-weight:700; font-size:15px; }
+  button:active { background:var(--pale); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Milk CLR Calculator</h1>
+  <p class="sub">Enter Fat and SNF as two-digit numbers. For example, type <b>37</b> for 3.7% fat and <b>77</b> for 7.7% SNF. CLR updates automatically.</p>
+
+  <label for="fat">Fat (type 37 for 3.7%)</label>
+  <input id="fat" type="number" inputmode="numeric" min="0" max="1000" step="1" placeholder="e.g. 37" autocomplete="off">
+
+  <label for="snf">SNF (type 77 for 7.7%)</label>
+  <input id="snf" type="number" inputmode="numeric" min="0" max="1000" step="1" placeholder="e.g. 77" autocomplete="off">
+
+  <section class="result" aria-live="polite">
+    <div class="result-title">Calculated CLR</div>
+    <div id="output">—</div>
+    <div id="status">Enter both values to calculate.</div>
+  </section>
+
+  <div class="formula">
+    <b>Formula</b><br>
+    CLR = 4 × [SNF − (0.2 × Fat) − 0.36]<br>
+    Your entries are divided by 10 automatically before calculation.
+  </div>
+  <button type="button" id="reset">Clear values</button>
+</main>
+<script>
+(function () {
+  const fatInput = document.getElementById('fat');
+  const snfInput = document.getElementById('snf');
+  const output = document.getElementById('output');
+  const status = document.getElementById('status');
+
+  function calculate() {
+    const fatRaw = fatInput.value.trim();
+    const snfRaw = snfInput.value.trim();
+
+    if (fatRaw === '' || snfRaw === '') {
+      output.textContent = '—';
+      status.textContent = 'Enter both values to calculate.';
+      return;
+    }
+
+    const fatEntry = Number(fatRaw);
+    const snfEntry = Number(snfRaw);
+
+    if (!Number.isFinite(fatEntry) || !Number.isFinite(snfEntry) ||
+        fatEntry < 0 || snfEntry < 0 || fatEntry > 1000 || snfEntry > 1000) {
+      output.textContent = '—';
+      status.textContent = 'Enter valid non-negative values (up to 1000).';
+      return;
+    }
+
+    const fat = fatEntry / 10;
+    const snf = snfEntry / 10;
+    const clr = 4 * (snf - (0.2 * fat) - 0.36);
+
+    output.textContent = clr.toFixed(2);
+    status.textContent = `Using Fat ${fat.toFixed(1)}% and SNF ${snf.toFixed(1)}%.`;
+  }
+
+  fatInput.addEventListener('input', calculate);
+  snfInput.addEventListener('input', calculate);
+  document.getElementById('reset').addEventListener('click', function () {
+    fatInput.value = '';
+    snfInput.value = '';
+    calculate();
+    fatInput.focus();
+  });
+})();
+</script>
+</body>
+</html>
